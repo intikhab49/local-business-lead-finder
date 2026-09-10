@@ -9,7 +9,7 @@ export them to CSV or Excel.
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![FastAPI](https://img.shields.io/badge/API-FastAPI-009485)
 ![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/licence-PolyForm%20Noncommercial-orange)
 
 ---
 
@@ -240,6 +240,16 @@ mypy app/ --ignore-missing-imports
 - **No authentication.** Built to run on your own machine or a private network.
   Put it behind a reverse proxy with auth before exposing it.
 
-## License
+## Licence and ownership
 
-MIT — use it, sell what you find with it, fork it.
+Copyright © 2026 **Intikhab Azam**. All rights reserved.
+
+Published under the [PolyForm Noncommercial License 1.0.0](LICENSE) — the source
+is public to read, run, study and modify for **noncommercial** purposes.
+
+**Commercial rights are not granted.** Selling this software, selling a service
+built on it, or using it inside a business requires a separate written licence
+from the copyright holder. Only the owner may offer it commercially — open an
+issue or contact [@intikhab49](https://github.com/intikhab49) to arrange one.
+
+The leads you generate with it are yours. The software is not.

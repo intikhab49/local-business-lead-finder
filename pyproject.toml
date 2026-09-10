@@ -5,16 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "business-lead-finder"
 version = "1.0.0"
-description = "Business Lead Finder API for Dialer Applications using Foursquare Places API"
+description = "Self-hosted lead generation engine: grid discovery past provider result caps, free OpenStreetMap fallback, resumable runs, e-mail enrichment"
 readme = "README.md"
 requires-python = ">=3.12"
-license = {text = "MIT"}
-authors = [{name = "Business Lead Finder Team"}]
-keywords = ["business", "leads", "foursquare", "dialer", "fastapi"]
+license = {text = "PolyForm Noncommercial License 1.0.0"}
+authors = [{name = "Intikhab Azam"}]
+keywords = ["business", "leads", "lead-generation", "google-places", "openstreetmap", "fastapi"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3.12",
     "Framework :: FastAPI",
 ]
