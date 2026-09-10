@@ -1,0 +1,98 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Distribution / Packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+logs/
+
+# Type checking
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE specific
+.project
+.pydevproject
+*.pyproj
+*.sln
+*.suo
+
+# Distribution / Packaging
+.Python
+env/
+pip-wheel-metadata/
+
+# Coverage
+*.cover
+*.py,cover
+
+# Hypothesis
+.hypothesis/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# Docker
+.dockerignore
+
+# Local development
+local_settings.py
+
+# Local data — never publish scraped leads or a populated database
+*.db
+*.sqlite
+*.sqlite3
+business_leads.db
+leads_*.csv
+leads_*.xlsx
+exports/
+
+# Secrets
+.env
+*.pem
+*.key

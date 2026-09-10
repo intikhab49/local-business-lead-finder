@@ -1,0 +1,459 @@
+/* ============================================================
+   Business Lead Finder — Professional SaaS UI Theme
+   Variables are injected by _runtime.inject_global_css() so the
+   palette follows Streamlit's active light/dark theme.
+   ============================================================ */
+
+/* Hide default Streamlit chrome: main menu + footer */
+#MainMenu,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+footer {
+  visibility: hidden !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* ---- Root app surfaces ---- */
+.stApp {
+  background: var(--surface-2);
+}
+
+.stApp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      180deg,
+      var(--primary-soft) 0%,
+      transparent 320px
+    );
+  z-index: 0;
+}
+
+[data-testid="stHeader"] {
+  background: transparent;
+}
+
+.main .block-container {
+  padding-top: 1.75rem;
+  padding-bottom: 3rem;
+  max-width: 1320px;
+}
+
+/* ---- Typography ---- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.15rem; }
+
+[data-testid="stHeading"] h1,
+[data-testid="stHeading"] h2,
+[data-testid="stHeading"] h3 {
+  color: var(--text-primary);
+}
+
+/* ---- Sidebar ---- */
+section[data-testid="stSidebar"] {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding-top: 0.5rem;
+}
+
+section[data-testid="stSidebar"] .stMarkdown p,
+section[data-testid="stSidebar"] .stCaption,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p {
+  color: var(--text-secondary);
+}
+
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] strong {
+  color: var(--text-primary);
+}
+
+/* Sidebar brand */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem 1rem;
+}
+
+.sidebar-brand img,
+.sidebar-brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-text h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sidebar-brand-text p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ---- Sidebar radio navigation (styled as a nav menu) ---- */
+section[data-testid="stSidebar"] [data-testid="stRadio"] > div {
+  gap: 2px;
+}
+
+section[data-testid="stSidebar"] [data-testid="stRadio"] label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: var(--text-secondary) !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+  background: var(--surface-hover);
+  color: var(--primary) !important;
+  transform: translateX(3px);
+}
+
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
+  background: var(--primary-soft);
+  color: var(--primary) !important;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p {
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
+section[data-testid="stSidebar"] [data-testid="stRadio"] label input {
+  accent-color: var(--primary);
+  width: 15px;
+  height: 15px;
+}
+
+/* Sidebar status pills */
+.metric-good,
+.metric-bad {
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.metric-good {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.metric-bad {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* ---- Elevated metric cards ---- */
+[data-testid="stMetric"] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-testid="stMetric"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-light));
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+[data-testid="stMetric"]:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--primary-light);
+}
+
+[data-testid="stMetric"]:hover::after {
+  opacity: 1;
+}
+
+[data-testid="stMetricLabel"] {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+[data-testid="stMetricValue"] {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.7rem;
+}
+
+[data-testid="stMetricDelta"] {
+  font-size: 0.8rem;
+}
+
+/* ---- Cards / detail boxes ---- */
+.business-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-bottom: 0.9rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.22s ease;
+}
+
+.business-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.business-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.business-card p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.business-card .label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  border-left: 4px solid var(--primary);
+}
+
+.enriched-field {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+/* ---- Buttons ---- */
+.stButton > button,
+.stDownloadButton > button,
+.stFormSubmitButton > button {
+  background: var(--button-blue) !important;
+  border-color: var(--button-blue) !important;
+  color: #fff !important;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.45rem 0.95rem;
+  transition: all 0.18s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+.stFormSubmitButton > button:hover {
+  background: var(--button-blue-hover) !important;
+  border-color: var(--button-blue-hover) !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stButton > button:active,
+.stDownloadButton > button:active,
+.stFormSubmitButton > button:active {
+  transform: translateY(0);
+}
+
+/* Destructive actions remain clearly distinguishable from standard actions. */
+[class*="st-key-delete_lead_"] button,
+[class*="delete_all_btn"] button,
+[class*="st-key-history_delete"] button,
+[class*="st-key-history_clear"] button {
+  background: var(--button-danger) !important;
+  border-color: var(--button-danger) !important;
+  color: #fff !important;
+}
+
+[class*="st-key-delete_lead_"] button:hover,
+[class*="delete_all_btn"] button:hover,
+[class*="st-key-history_delete"] button:hover,
+[class*="st-key-history_clear"] button:hover {
+  background: var(--button-danger-hover) !important;
+  border-color: var(--button-danger-hover) !important;
+  color: #fff !important;
+}
+
+/* ---- Inputs / widgets ---- */
+.stTextInput input,
+.stNumberInput input,
+.stSelectbox [data-baseweb="select"] > div,
+.stTextArea textarea {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: all 0.18s ease;
+}
+
+.stTextInput input:hover,
+.stNumberInput input:hover,
+.stTextArea textarea:hover {
+  border-color: var(--primary-light);
+}
+
+.stTextInput input:focus,
+.stNumberInput input:focus,
+.stTextArea textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Sliders */
+[data-testid="stSlider"] [data-baseweb="slider"] div {
+  accent-color: var(--primary);
+}
+
+/* ---- Tabs ---- */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.25rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.18s ease;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+  color: var(--primary);
+  background: var(--surface-hover);
+}
+
+.stTabs [aria-selected="true"] {
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Expanders ---- */
+[data-testid="stExpander"] {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+[data-testid="stExpander"]:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+[data-testid="stExpander"] summary {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+[data-testid="stExpander"] summary:hover {
+  color: var(--primary);
+}
+
+/* ---- Dataframe ---- */
+.stDataFrame {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Alerts (kept colorful) ---- */
+.stAlert {
+  border-radius: 10px;
+  border: none;
+}
+
+/* ---- Forms ---- */
+.stForm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Dividers ---- */
+hr {
+  border-color: var(--border);
+  opacity: 0.6;
+}
+
+/* ---- Status badges ---- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-success { background: var(--success-light); color: var(--success); }
+.status-warning { background: var(--warning-light); color: var(--warning); }
+.status-danger  { background: var(--danger-light); color: var(--danger); }
+.status-info    { background: var(--primary-light); color: var(--primary); }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ---- Spinner ---- */
+.stSpinner > div {
+  border-color: var(--primary) transparent transparent transparent;
+}
