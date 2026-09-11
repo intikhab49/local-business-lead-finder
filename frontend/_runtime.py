@@ -130,6 +130,8 @@ def _status_badge(status: str) -> str:
         return "❌ Failed"
     if status == "running":
         return "⏳ Running"
+    if status == "interrupted":
+        return "⚠️ Interrupted"
     return status.capitalize() or "Unknown"
 
 

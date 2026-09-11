@@ -10,8 +10,9 @@ from app.api import api_router
 from app.core.config import settings
 from app.core.exceptions import BusinessLeadFinderError
 from app.core.logging import setup_logging
-from app.db.database import get_engine, init_db
+from app.db.database import get_engine, get_session_local, init_db
 from app.dependencies import get_business_search_service, get_provider
+from app.services.run_history_service import mark_interrupted_runs
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -24,6 +25,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     init_db()
     logger.info("Database ready")
+
+    session = get_session_local()()
+    try:
+        mark_interrupted_runs(session)
+    except Exception:
+        logger.warning("Could not close out orphaned runs during startup", exc_info=True)
+    finally:
+        session.close()
 
     # Non-blocking health check
     try:

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 _STATUS_RUNNING = "running"
 _STATUS_SUCCESS = "success"
 _STATUS_FAILED = "failed"
+_STATUS_INTERRUPTED = "interrupted"
 
 
 def start_run(
@@ -64,10 +65,32 @@ def finish_run(
     return finish_run_history(db, run, **updates)
 
 
+def mark_interrupted_runs(db: Session) -> int:
+    """Close out runs left 'running' by a previous process.
+
+    Discovery jobs live in memory, so a run still marked running at startup
+    died with the old process. The checkpoint is left intact so the run can
+    still be resumed.
+    """
+    runs = (
+        db.query(RunHistory).filter(RunHistory.status == _STATUS_RUNNING).all()
+    )
+    for run in runs:
+        run.status = _STATUS_INTERRUPTED
+        run.finished_at = utcnow()
+        run.error_message = run.error_message or "Server stopped before the run finished"
+    if runs:
+        db.commit()
+        logger.info("[RunHistory] Marked %d orphaned run(s) interrupted", len(runs))
+    return len(runs)
+
+
 __all__ = [
     "_STATUS_RUNNING",
     "_STATUS_SUCCESS",
     "_STATUS_FAILED",
+    "_STATUS_INTERRUPTED",
     "start_run",
     "finish_run",
+    "mark_interrupted_runs",
 ]

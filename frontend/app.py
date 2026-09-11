@@ -610,7 +610,7 @@ def render_exclusions() -> None:
 # ── History ───────────────────────────────────────────────────────
 
 RUN_TYPES = ["", "discovery", "search", "agent_search", "enrichment"]
-RUN_STATUSES = ["", "success", "running", "failed", "cancelled"]
+RUN_STATUSES = ["", "success", "running", "failed", "cancelled", "interrupted"]
 
 
 def history_page() -> None:

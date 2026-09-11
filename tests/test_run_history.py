@@ -230,6 +230,27 @@ class TestRunHistoryService:
         )
         assert len(finished.error_message) == 2000
 
+    def test_mark_interrupted_runs(self, db_session):
+        from app.db import repository
+        from app.services.run_history_service import mark_interrupted_runs
+
+        checkpoint = {"cells_planned": 36, "cells_done": ["a", "b"], "found": 12}
+        stuck = repository.create_run_history(
+            db_session,
+            _run_data(status="running", finished_at=None, checkpoint=checkpoint),
+        )
+        done = repository.create_run_history(db_session, _run_data(status="success"))
+
+        assert mark_interrupted_runs(db_session) == 1
+
+        stuck = repository.get_run_history(db_session, stuck.id)
+        assert stuck.status == "interrupted"
+        assert stuck.finished_at is not None
+        assert stuck.error_message
+        assert stuck.checkpoint == checkpoint
+        assert repository.get_run_history(db_session, done.id).status == "success"
+        assert mark_interrupted_runs(db_session) == 0
+
 
 class TestRunHistoryEndpoints:
     def test_list_empty(self, api_client):
