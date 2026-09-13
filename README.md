@@ -1,25 +1,33 @@
-# Lead Finder
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:064E3B,50:10B981,100:34D399&height=180&section=header&text=Lead%20Finder&fontSize=54&fontColor=ffffff&fontAlignY=38&desc=Self-hosted%20local%20business%20lead%20generation%20engine&descSize=17&descAlignY=60&animation=fadeIn" width="100%" alt="Lead Finder — self-hosted local business lead generation engine"/>
+
+# Local Business Lead Generation Engine — Google Places & OpenStreetMap Lead Scraper
 
 **Pull hundreds of local businesses — with phone, website and e-mail — out of an area that most tools cap at 20.**
 
-A self-hosted lead generation engine: FastAPI backend, Streamlit workspace,
-SQLite storage. Point it at a city and a business type, watch the leads arrive,
-export them to CSV or Excel.
+<p>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"/>
+  <img src="https://img.shields.io/badge/FastAPI-009485?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit"/>
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
+  <img src="https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="OpenStreetMap"/>
+  <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange?style=for-the-badge" alt="PolyForm Noncommercial license"/>
+</p>
 
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-![FastAPI](https://img.shields.io/badge/API-FastAPI-009485)
-![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B)
-![License](https://img.shields.io/badge/licence-PolyForm%20Noncommercial-orange)
+[The problem](#-the-problem-this-solves) · [Quick start](#-quick-start) · [How it works](#-how-a-run-works) · [API](#-api-reference) · [Configuration](#%EF%B8%8F-configuration) · [Limits](#-honest-limits)
+
+</div>
 
 ---
 
-## The problem this solves
+A self-hosted **lead generation tool** and **Google Maps / Google Places lead scraper alternative**: FastAPI backend, Streamlit workspace, SQLite storage. Point it at a city and a business type — *"dentists in Chicago"*, *"plumbers in Austin"* — watch the leads arrive, and export them to **CSV or Excel** with phone numbers, websites, e-mail addresses and social profiles.
 
-Every places API has a ceiling. **Google Places returns at most 60 results per
-text query** no matter how you paginate it — so "dentists in Chicago" gives you
-the same 60 businesses today, tomorrow and next week. Scraping tools built on
-top of that inherit the ceiling, hand you duplicates on every re-run, and freeze
-a browser tab for ten minutes while they work.
+Built for agencies, cold-callers, sales teams and anyone building **B2B prospect lists** who is tired of paying per lead.
+
+## 🎯 The problem this solves
+
+Every places API has a ceiling. **Google Places returns at most 60 results per text query** no matter how you paginate it — so "dentists in Chicago" gives you the same 60 businesses today, tomorrow and next week. Scraping tools built on top of that inherit the ceiling, hand you duplicates on every re-run, and freeze a browser tab for ten minutes while they work.
 
 Lead Finder gets past all three:
 
@@ -33,7 +41,7 @@ Lead Finder gets past all three:
 | Crash halfway = start over | **Every cell is saved and checkpointed as it finishes**, so an interrupted run resumes from the first area it never reached |
 | No e-mail addresses | Scrapes every discovered website for **e-mail and social profiles** |
 
-## Measured on a real run
+## 📏 Measured on a real run
 
 Google Places primary, OSM fallback, 3×3 grid, dedup on:
 
@@ -44,24 +52,20 @@ enriching  100%  found=58  62s   Scraping websites for contact details — 34/56
 completed  100%  found=58  94s   58 leads · 54 enriched
 ```
 
-58 businesses from an area a single query caps at 60 — while a parallel
-"dentists in Austin" run surfaced 57 new leads and silently discarded 23
-already in the database. Search finishes in seconds; the website scraping stage
-is the slow part, at roughly one site per second.
+58 businesses from an area a single query caps at 60 — while a parallel "dentists in Austin" run surfaced 57 new leads and silently discarded 23 already in the database. Search finishes in seconds; the website scraping stage is the slow part, at roughly one site per second.
 
-## Quick start
+## ⚡ Quick start
 
 ```bash
-git clone https://github.com/intikhab49/Upgraded-Lead-Finder-.git
-cd Upgraded-Lead-Finder-
+git clone https://github.com/intikhab49/local-business-lead-finder.git
+cd local-business-lead-finder
 pip install -r requirements.txt
 
 cp .env.example .env        # optional: add GOOGLE_PLACES_API_KEY
 ```
 
-**No API key? It still works.** Set `PROVIDER_NAME=osm` and the whole thing runs
-on OpenStreetMap — free, no signup, no billing, no per-query cap. Add a Google
-key later for richer data (ratings, opening hours, better phone coverage).
+> [!TIP]
+> **No API key? It still works.** Set `PROVIDER_NAME=osm` and the whole thing runs on OpenStreetMap — free, no signup, no billing, no per-query cap. Add a Google key later for richer data (ratings, opening hours, better phone coverage).
 
 ```bash
 # backend
@@ -71,43 +75,32 @@ python -m uvicorn app.main:app --port 8000
 streamlit run frontend/app.py --server.port 8501
 ```
 
-Open **http://localhost:8501** to work, or **http://localhost:8000/docs** for the API.
+Open **http://localhost:8501** to work, or **http://localhost:8000/docs** for the interactive API docs.
 
-## The workspace
+## 🖥️ The workspace
 
 Three screens, no clutter:
 
-- **Find leads** — one form: where, what, how wide, how deep. Start it and watch
-  the run: areas searched, leads found, duplicates skipped, scraping progress,
-  current pacing. Stop whenever you like and keep everything found so far.
-- **Saved leads** — filter by text, status or search run; page through them;
-  export to CSV or Excel; delete a batch you don't want.
-- **History** — every run with status, lead count, duration and timing;
-  filterable and exportable; resume the ones that stopped early.
+- **Find leads** — one form: where, what, how wide, how deep. Start it and watch the run: areas searched, leads found, duplicates skipped, scraping progress, current pacing. Stop whenever you like and keep everything found so far.
+- **Saved leads** — filter by text, status or search run; page through them; export to CSV or Excel; delete a batch you don't want.
+- **History** — every run with status, lead count, duration and timing; filterable and exportable; resume the ones that stopped early.
 
-**You choose what happens to results, up front.** Every run asks: *save to the
-database as they arrive*, or *hold for review* — where nothing is written until
-you tick the rows you want. No silent writes.
+**You choose what happens to results, up front.** Every run asks: *save to the database as they arrive*, or *hold for review* — where nothing is written until you tick the rows you want. No silent writes.
 
-## How a run works
+## 🔄 How a run works
 
-```
-location + category
-        ↓
-  geocode → split the area into N×N cells
-        ↓
-  ┌─────────────────────────────────────────────┐
-  │  4 cells searched at once                   │
-  │    · paced by an adaptive rate limiter      │
-  │    · 429/5xx retried with jittered backoff  │
-  │    · failed cell → free OSM fallback        │
-  │    · results deduped against the database   │
-  │    · each finished cell saved + checkpointed│
-  └─────────────────────────────────────────────┘
-        ↓
-  scrape every website found for e-mail + socials (20 at a time)
-        ↓
-  review, export, or hand to your dialer
+```mermaid
+flowchart TD
+    A["📍 Location + business category"] --> B["Geocode → split area into N×N grid cells"]
+    B --> C{"Search 4 cells at once"}
+    C -->|"adaptive rate limiter"| D["Google Places (New v1)"]
+    D -->|"429 / 5xx / error"| E["Retry with jittered backoff"]
+    E -->|"still failing"| F["🆓 OpenStreetMap / Overpass fallback"]
+    D --> G["Deduplicate against the whole database"]
+    F --> G
+    G --> H["💾 Save + checkpoint each finished cell"]
+    H --> I["Scrape websites for e-mail + socials (20 at a time)"]
+    I --> J["✅ Review · export CSV / Excel · hand to your dialer"]
 ```
 
 **Start a run** — `POST /api/v1/discovery/start` returns a job id immediately:
@@ -120,12 +113,9 @@ curl -X POST localhost:8000/api/v1/discovery/start -H 'Content-Type: application
 }'
 ```
 
-Then poll `GET /discovery/{job_id}` for live progress, read partial results from
-`/{job_id}/results`, stop it with `/{job_id}/cancel`, or save a chosen subset
-with `/{job_id}/save`. `GET /discovery/runs/resumable` lists runs that stopped
-early — pass `resume_run_id` to `/start` to continue one.
+Then poll `GET /discovery/{job_id}` for live progress, read partial results from `/{job_id}/results`, stop it with `/{job_id}/cancel`, or save a chosen subset with `/{job_id}/save`. `GET /discovery/runs/resumable` lists runs that stopped early — pass `resume_run_id` to `/start` to continue one.
 
-## What's in the box
+## 🧰 What's in the box
 
 | Layer | Technology |
 |-------|-----------|
@@ -150,13 +140,11 @@ frontend/             # Streamlit workspace + API client
 tests/                # unit + integration suites
 ```
 
-Swapping providers is a config change, not a code change — every provider
-implements the same `BaseProvider` contract (`app/providers/base.py`).
+Swapping providers is a config change, not a code change — every provider implements the same `BaseProvider` contract (`app/providers/base.py`).
 
-## Configuration
+## ⚙️ Configuration
 
-Everything lives in `.env` (see `.env.example`, and `app/core/config.py` for the
-full list). The ones that matter:
+Everything lives in `.env` (see `.env.example`, and `app/core/config.py` for the full list). The ones that matter:
 
 | Variable | What it does | Default |
 |----------|--------------|---------|
@@ -171,11 +159,10 @@ full list). The ones that matter:
 | `DATABASE_URL` | SQLAlchemy URL | `sqlite:///./business_leads.db` |
 | `GEMINI_API_KEY` | Optional — enables the LLM decision engine | — |
 
-> **Place IDs.** The schema uses the historical field name `fsq_place_id` for
-> backward compatibility. It holds whatever the active provider issued: a Google
-> place ID (`ChIJ…`), an OSM reference (`osm:n42`), or a Foursquare ID.
+> [!NOTE]
+> **Place IDs.** The schema uses the historical field name `fsq_place_id` for backward compatibility. It holds whatever the active provider issued: a Google place ID (`ChIJ…`), an OSM reference (`osm:n42`), or a Foursquare ID.
 
-## API reference
+## 📡 API reference
 
 All routes are mounted under `/api/v1`.
 
@@ -192,7 +179,8 @@ All routes are mounted under `/api/v1`.
 | GET | `/discovery/jobs` | Jobs in this server process |
 | GET | `/discovery/runs/resumable` | Runs that stopped with areas left |
 
-**Search, leads, review, export, history**
+<details>
+<summary><b>Search, leads, review, export, history</b></summary>
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -207,11 +195,11 @@ All routes are mounted under `/api/v1`.
 | GET | `/export/csv` · `/export/excel` | Download saved leads with every field |
 | GET | `/history` · `/history/stats` · `/history/export/csv` | Run history and exports |
 
-Exported rows carry: name, address, city, state, country, phone, website,
-e-mail, LinkedIn, Facebook, Instagram, X, YouTube, categories, coordinates,
-confidence score, source, review status, created/updated timestamps.
+</details>
 
-## Testing
+Exported rows carry: name, address, city, state, country, phone, website, e-mail, LinkedIn, Facebook, Instagram, X, YouTube, categories, coordinates, confidence score, source, review status, created/updated timestamps.
+
+## 🧪 Testing
 
 ```bash
 pytest tests/ -v                              # full suite
@@ -224,32 +212,33 @@ ruff check app/ frontend/ tests/
 mypy app/ --ignore-missing-imports
 ```
 
-## Honest limits
+## 🧭 Honest limits
 
-- **E-mail coverage depends on the website.** Addresses come from scraping, so a
-  business with no site — or one that hides contact behind a JS form — won't
-  have one. Expect roughly 4 in 5 among leads that have a scrapable site.
-- **OpenStreetMap coverage varies by area and category.** It is excellent for
-  cafés, clinics and shops in mapped cities; thin for niche B2B categories.
-- **Overpass is volunteer-run.** The client paces itself, rotates mirrors and
-  backs off, but a busy mirror can still slow a run down.
+- **E-mail coverage depends on the website.** Addresses come from scraping, so a business with no site — or one that hides contact behind a JS form — won't have one. Expect roughly 4 in 5 among leads that have a scrapable site.
+- **OpenStreetMap coverage varies by area and category.** It is excellent for cafés, clinics and shops in mapped cities; thin for niche B2B categories.
+- **Overpass is volunteer-run.** The client paces itself, rotates mirrors and backs off, but a busy mirror can still slow a run down.
 - **Google billing still applies.** A 5×5 grid is 25 searches, not one.
-- **Website scraping is the slow stage** — about a second per site. A 400-lead
-  run spends most of its wall clock here, not in the search. Turn it off for
-  pure phone-number lists.
-- **No authentication.** Built to run on your own machine or a private network.
-  Put it behind a reverse proxy with auth before exposing it.
+- **Website scraping is the slow stage** — about a second per site. A 400-lead run spends most of its wall clock here, not in the search. Turn it off for pure phone-number lists.
+- **No authentication.** Built to run on your own machine or a private network. Put it behind a reverse proxy with auth before exposing it.
 
-## Licence and ownership
+## 📜 Licence and ownership
 
 Copyright © 2026 **Intikhab Azam**. All rights reserved.
 
-Published under the [PolyForm Noncommercial License 1.0.0](LICENSE) — the source
-is public to read, run, study and modify for **noncommercial** purposes.
+Published under the [PolyForm Noncommercial License 1.0.0](LICENSE) — the source is public to read, run, study and modify for **noncommercial** purposes.
 
-**Commercial rights are not granted.** Selling this software, selling a service
-built on it, or using it inside a business requires a separate written licence
-from the copyright holder. Only the owner may offer it commercially — open an
-issue or contact [@intikhab49](https://github.com/intikhab49) to arrange one.
+**Commercial rights are not granted.** Selling this software, selling a service built on it, or using it inside a business requires a separate written licence from the copyright holder. Only the owner may offer it commercially — open an issue or contact [@intikhab49](https://github.com/intikhab49) to arrange one.
 
 The leads you generate with it are yours. The software is not.
+
+---
+
+<div align="center">
+
+**Built by [Intikhab Azam](https://github.com/intikhab49)** — AI & automation engineer · lead generation · voice AI agents · RAG
+
+⭐ If this saved you from paying per lead, star the repo.
+
+<sub>Keywords: lead generation tool · Google Maps scraper alternative · Google Places API scraper · local business leads · B2B prospecting · OpenStreetMap Overpass · email finder · FastAPI · Streamlit · Python</sub>
+
+</div>
