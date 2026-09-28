@@ -121,6 +121,20 @@ class TestDiscovery:
         assert len(report.businesses) <= 12
         assert any(o.status == "capped" for o in report.outcomes)
 
+    async def test_max_total_caps_what_on_cell_hands_off(self):
+        # on_cell saves leads immediately, so the cap must hold before the hand-off.
+        provider = FakeProvider(
+            results={i: [f"c{i}-{n}" for n in range(10)] for i in range(9)}
+        )
+        flushed: list[int] = []
+        engine = DiscoveryEngine(
+            provider, concurrency=4,
+            on_cell=lambda outcome, businesses: flushed.append(len(businesses)),
+        )
+        report = await engine.discover(query(), grid_size=3, max_total=12)
+        assert sum(flushed) == 12
+        assert len(report.businesses) == 12
+
     async def test_skip_cells_supports_resume(self):
         provider = FakeProvider()
         engine = DiscoveryEngine(provider, concurrency=2)

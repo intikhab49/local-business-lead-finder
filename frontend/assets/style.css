@@ -457,3 +457,10 @@ hr {
 .stSpinner > div {
   border-color: var(--primary) transparent transparent transparent;
 }
+
+/* Live search pages rerun every 1.5s; Streamlit would dim every element while
+   it waits, which reads as flicker. Keep them fully visible. */
+[data-stale="true"] {
+  opacity: 1 !important;
+  transition: none !important;
+}

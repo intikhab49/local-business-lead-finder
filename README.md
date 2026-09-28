@@ -7,7 +7,7 @@
 **Pull hundreds of local businesses — with phone, website and e-mail — out of an area that most tools cap at 20.**
 
 <p>
-  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"/>
+  <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+"/>
   <img src="https://img.shields.io/badge/FastAPI-009485?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit"/>
   <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
@@ -119,7 +119,7 @@ Then poll `GET /discovery/{job_id}` for live progress, read partial results from
 
 | Layer | Technology |
 |-------|-----------|
-| Runtime | Python 3.11+ |
+| Runtime | Python 3.12+ |
 | API | FastAPI, Pydantic v2, Uvicorn |
 | Providers | Google Places (New v1) · OpenStreetMap/Overpass (free fallback) · Foursquare · Geoapify |
 | Data | SQLAlchemy 2.0, SQLite, openpyxl |

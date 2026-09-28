@@ -29,6 +29,7 @@ from api_client import (
     get_lead_stats,
     get_run_history,
     get_run_history_stats,
+    get_settings,
     health_check,
     list_discovery_jobs,
     list_exclusions,
@@ -39,7 +40,9 @@ from api_client import (
     list_run_history,
     save_discovery_leads,
     start_discovery,
+    test_api_key,
     unexclude_business,
+    update_settings,
 )
 
 st.set_page_config(
@@ -53,6 +56,27 @@ PAGES = {
     "Find leads": "🔍",
     "Saved leads": "📇",
     "History": "🕘",
+    "Settings": "⚙️",
+}
+
+SOURCE_LABELS = {
+    "google_places": "Google Places — best data: phones, websites, ratings. Needs a Google key with billing on.",
+    "geoapify": "Geoapify — free key, no card needed. Fewer phone numbers than Google.",
+    "osm": "OpenStreetMap — no key at all. Slowest, and the thinnest data.",
+}
+
+KEY_HELP = {
+    "google_places": (
+        "1. Open console.cloud.google.com and create a project.\n"
+        "2. Billing → link a billing account (Google gives a free monthly allowance).\n"
+        "3. APIs & Services → Library → enable **Places API (New)**.\n"
+        "4. APIs & Services → Credentials → Create credentials → API key. Paste it here."
+    ),
+    "geoapify": (
+        "1. Sign up free at myprojects.geoapify.com — no card needed.\n"
+        "2. Create a project.\n"
+        "3. Copy its API key and paste it here."
+    ),
 }
 
 PROVIDER_LABELS = {
@@ -726,6 +750,93 @@ def history_page() -> None:
     st.caption(f"Page {page_number} of {pages}")
 
 
+# ── Settings ──────────────────────────────────────────────────────
+
+def show_key_test(provider: str, api_key: str | None) -> None:
+    try:
+        with st.spinner("Checking the key…"):
+            result = test_api_key(provider, api_key)
+    except Exception as exc:  # noqa: BLE001
+        toast_error(exc)
+        return
+    if result["ok"]:
+        st.success(result["message"], icon="✅")
+    else:
+        st.error(result["message"], icon="⚠️")
+
+
+def render_key_field(provider: str, label: str, saved: dict) -> str:
+    """A masked input for one key with its own Test button; returns what was typed."""
+    cols = st.columns([4, 1], vertical_alignment="bottom")
+    typed = cols[0].text_input(
+        label,
+        type="password",
+        # A new key after each save gives an empty box showing the saved hint.
+        key=f"key_{provider}_{state('key_version', 0)}",
+        placeholder=(
+            f"Saved ({saved['hint']}) — leave blank to keep it"
+            if saved.get("set") else "Paste your key here"
+        ),
+    )
+    if cols[1].button("Test key", key=f"test_{provider}", width="stretch"):
+        show_key_test(provider, typed.strip() or None)
+    with st.expander(f"How do I get a {label.removesuffix(' API key')} key?"):
+        st.markdown(KEY_HELP[provider])
+    return typed.strip()
+
+
+def render_settings() -> None:
+    st.title("Settings")
+    notice = st.session_state.pop("settings_notice", None)
+    if notice:
+        st.success(notice, icon="✅")
+        if st.session_state.get("saved_source") in KEY_HELP:
+            show_key_test(st.session_state["saved_source"], None)
+
+    try:
+        current = get_settings()
+    except Exception as exc:  # noqa: BLE001
+        toast_error(exc)
+        return
+    keys = current["keys"]
+
+    st.subheader("Where to search")
+    options = list(SOURCE_LABELS)
+    source = st.radio(
+        "Data source",
+        options=options,
+        index=options.index(current["provider_name"]) if current["provider_name"] in options else 0,
+        format_func=SOURCE_LABELS.get,
+        label_visibility="collapsed",
+    )
+
+    st.subheader("API keys")
+    st.caption("Keys are stored only on this computer, in the .env file next to the app.")
+    google_key = render_key_field("google_places", "Google Places API key", keys["google_places"])
+    geoapify_key = render_key_field("geoapify", "Geoapify API key", keys["geoapify"])
+
+    if not st.button("Save", type="primary"):
+        return
+    fields = {"provider_name": source}
+    if google_key:
+        fields["google_places_api_key"] = google_key
+    if geoapify_key:
+        fields["geoapify_api_key"] = geoapify_key
+    try:
+        update_settings(**fields)
+    except Exception as exc:  # noqa: BLE001
+        toast_error(exc)
+        return
+
+    cached_providers.clear()
+    st.session_state["key_version"] = state("key_version", 0) + 1
+    st.session_state["saved_source"] = source
+    st.session_state["settings_notice"] = (
+        f"Saved. New searches use {SOURCE_LABELS[source].split(' —')[0]}."
+    )
+    st.rerun()
+
+
 # ── main ──────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -734,6 +845,8 @@ def main() -> None:
         render_find_leads()
     elif page == "Saved leads":
         render_saved_leads()
+    elif page == "Settings":
+        render_settings()
     else:
         history_page()
 

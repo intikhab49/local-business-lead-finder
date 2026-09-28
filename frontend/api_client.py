@@ -76,6 +76,27 @@ def search_businesses(
     return _request_json(resp)
 
 
+# ── Settings (data source + API keys) ─────────────────────────────
+
+def get_settings() -> dict[str, Any]:
+    resp = _session.get(_url("/settings"), timeout=10)
+    return _request_json(resp)
+
+
+def update_settings(**fields: Any) -> dict[str, Any]:
+    resp = _session.put(_url("/settings"), json=fields, timeout=10)
+    return _request_json(resp)
+
+
+def test_api_key(provider: str, api_key: str | None = None) -> dict[str, Any]:
+    resp = _session.post(
+        _url("/settings/test"),
+        json={"provider": provider, "api_key": api_key},
+        timeout=40,
+    )
+    return _request_json(resp)
+
+
 # ── Discovery jobs (non-blocking crawl) ───────────────────────────
 
 def list_providers() -> dict[str, Any]:

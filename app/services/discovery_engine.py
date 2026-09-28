@@ -231,7 +231,7 @@ class DiscoveryEngine:
                     await self._record(report, CellOutcome(cell.index, reason), [])
                     return
                 outcome, businesses = await self._search_cell(cell, query, per_cell_max)
-                await self._record(report, outcome, businesses)
+                await self._record(report, outcome, businesses, limit=max_total)
 
         await asyncio.gather(*(run_cell(cell) for cell in pending))
 
@@ -242,12 +242,22 @@ class DiscoveryEngine:
         return report
 
     async def _record(
-        self, report: DiscoveryReport, outcome: CellOutcome, businesses: list[Business]
+        self,
+        report: DiscoveryReport,
+        outcome: CellOutcome,
+        businesses: list[Business],
+        limit: int | None = None,
     ) -> None:
-        """Deduplicate, append, and flush one cell's results — under a lock."""
+        """Deduplicate, append, and flush one cell's results — under a lock.
+
+        ``limit`` caps the run's total. It is applied here, before the results
+        are handed off, because the callback saves them straight away.
+        """
         async with self._lock:
             fresh: list[Business] = []
             for business in businesses:
+                if limit is not None and len(report.businesses) + len(fresh) >= limit:
+                    break
                 place_id = business.fsq_place_id
                 if not place_id or place_id in self.seen:
                     continue

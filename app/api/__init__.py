@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 
-from app.api.routes import business, discovery, export, history, leads, review
+from app.api.routes import business, discovery, export, history, leads, review, settings
 
 api_router = APIRouter()
+api_router.include_router(settings.router)
 api_router.include_router(business.router)
 api_router.include_router(discovery.router)
 api_router.include_router(review.router)

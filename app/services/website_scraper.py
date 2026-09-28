@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import re
+import ssl
 import time
 from urllib.parse import unquote, urljoin, urlparse
 
@@ -43,6 +44,20 @@ COMMON_CONTACT_PATHS = ("contact", "contact-us", "about", "about-us", "support",
 _EMAIL_PATTERN = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
 
 _PAGE_MISS = object()
+
+_ssl_context: ssl.SSLContext | None = None
+
+
+def _shared_ssl_context() -> ssl.SSLContext:
+    """One SSL context for every download.
+
+    Building one loads the whole CA bundle (~1s of CPU on the event loop).
+    A new client per page did that for every page and froze the server.
+    """
+    global _ssl_context
+    if _ssl_context is None:
+        _ssl_context = httpx.create_ssl_context()
+    return _ssl_context
 
 
 class WebsiteScraperService:
@@ -100,19 +115,16 @@ class WebsiteScraperService:
             return result
 
         try:
-            homepage_soup = BeautifulSoup(homepage_html, "html.parser")
-
-            email_start = time.monotonic()
-            homepage_emails = self._extract_emails(homepage_soup)
+            # Parsing is CPU-bound, so it runs in a thread: with 20 sites at once
+            # it stalled the event loop and every other request, /health included.
+            parse_start = time.monotonic()
+            homepage_emails, social, contact_urls = await asyncio.to_thread(
+                self._parse_page, homepage_html, base_url, website_url
+            )
             result["emails"] = homepage_emails
-            _log_stage("email_extraction", time.monotonic() - email_start)
-
-            social_start = time.monotonic()
-            social = self._extract_social_links(homepage_soup, base_url)
             result.update(social)
-            _log_stage("social_extraction", time.monotonic() - social_start)
+            _log_stage("homepage_parse", time.monotonic() - parse_start)
 
-            contact_urls = self._contact_page_urls(homepage_soup, base_url, website_url)
             if contact_urls:
                 logger.info("Checking %d public contact page(s) for %s", len(contact_urls), website_url)
                 contact_start = time.monotonic()
@@ -124,9 +136,10 @@ class WebsiteScraperService:
                 for contact_html in pages:
                     if isinstance(contact_html, Exception) or not contact_html:
                         continue
-                    contact_soup = BeautifulSoup(contact_html, "html.parser")
-                    emails.extend(self._extract_emails(contact_soup))
-                    contact_social = self._extract_social_links(contact_soup, base_url)
+                    contact_emails, contact_social, _ = await asyncio.to_thread(
+                        self._parse_page, contact_html, base_url
+                    )
+                    emails.extend(contact_emails)
                     for key in ("linkedin", "facebook", "instagram", "twitter", "youtube"):
                         if contact_social.get(key) and not result[key]:
                             result[key] = contact_social[key]
@@ -139,6 +152,14 @@ class WebsiteScraperService:
 
         _log_stage("scraper_total", time.monotonic() - scrape_start, website_url)
         return result
+
+    def _parse_page(
+        self, html: str, base_url: str, page_url: str | None = None
+    ) -> tuple[list[str], dict[str, str | None], list[str]]:
+        """E-mails, social links and, given the page's own URL, contact-page URLs."""
+        soup = BeautifulSoup(html, "html.parser")
+        contact_urls = self._contact_page_urls(soup, base_url, page_url) if page_url else []
+        return self._extract_emails(soup), self._extract_social_links(soup, base_url), contact_urls
 
     def _cached_page(self, url: str) -> str | None | object:
         entry = self._page_cache.get(url)
@@ -167,7 +188,9 @@ class WebsiteScraperService:
 
     async def _fetch_page(self, url: str) -> str | None:
         try:
-            async with httpx.AsyncClient(timeout=httpx.Timeout(self.timeout)) as client:
+            async with httpx.AsyncClient(
+                timeout=httpx.Timeout(self.timeout), verify=_shared_ssl_context()
+            ) as client:
                 response = await retry_async(
                     lambda: client.get(
                         url,

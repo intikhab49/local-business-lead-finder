@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -18,6 +19,20 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
+async def _startup_health_check() -> None:
+    try:
+        provider = get_provider()
+        is_healthy = await provider.health_check()
+        if is_healthy:
+            logger.info("%s API health check passed", provider.provider_name)
+        else:
+            logger.warning("%s API health check failed", provider.provider_name)
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        logger.warning("Provider health check failed during startup")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
@@ -34,20 +49,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     finally:
         session.close()
 
-    # Non-blocking health check
-    try:
-        provider = get_provider()
-        is_healthy = await provider.health_check()
-        if is_healthy:
-            logger.info("%s API health check passed", provider.provider_name)
-        else:
-            logger.warning("%s API health check failed", provider.provider_name)
-    except Exception:
-        logger.warning("Provider health check failed during startup")
+    # Health check runs in the background: a throttled Overpass mirror can take
+    # minutes to answer, and the server must accept requests in the meantime.
+    health_task = asyncio.create_task(_startup_health_check())
 
     yield
 
     logger.info("Shutting down...")
+    health_task.cancel()
     service = get_business_search_service()
     await service.close()
     get_engine().dispose()
@@ -111,7 +120,12 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["health"])
     async def health_check():
         service = get_business_search_service()
-        is_healthy = await service.provider.health_check()
+        # A throttled Overpass mirror can take a minute to answer; the UI polls
+        # this, so a slow provider counts as up rather than stalling the page.
+        try:
+            is_healthy = await asyncio.wait_for(service.provider.health_check(), timeout=5)
+        except TimeoutError:
+            is_healthy = True
         return {
             "status": "healthy" if is_healthy else "unhealthy",
             "service": settings.app_name,

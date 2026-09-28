@@ -249,6 +249,8 @@ class GeoapifyProvider(BaseProvider):
 
     @staticmethod
     def _map_category(category: str) -> str:
+        # Every value checked against the live Places API on 2026-09-29: an
+        # unsupported category is a 400, which reads as "no results".
         mapping = {
             "restaurant": "catering.restaurant",
             "restaurants": "catering.restaurant",
@@ -257,7 +259,7 @@ class GeoapifyProvider(BaseProvider):
             "bar and restaurant": "catering.bar",
             "pub": "catering.pub",
             "fast food": "catering.fast_food",
-            "bakery": "catering.bakery",
+            "bakery": "commercial.food_and_drink.bakery",
             "gym": "sport.fitness",
             "fitness": "sport.fitness",
             "fitness center": "sport.fitness",
@@ -266,18 +268,18 @@ class GeoapifyProvider(BaseProvider):
             "motel": "accommodation.motel",
             "supermarket": "commercial.supermarket",
             "grocery": "commercial.supermarket",
-            "pharmacy": "commercial.pharmacy",
+            "pharmacy": "healthcare.pharmacy",
             "dentist": "healthcare.dentist",
-            "doctor": "healthcare.doctor",
+            "doctor": "healthcare.clinic_or_praxis",
             "hospital": "healthcare.hospital",
-            "clinic": "healthcare.clinic",
+            "clinic": "healthcare.clinic_or_praxis",
             "school": "education.school",
             "bank": "service.financial.bank",
             "gas station": "service.vehicle.fuel",
             "car repair": "service.vehicle.repair",
             "car wash": "service.vehicle.car_wash",
-            "lawyer": "service.lawyer",
-            "insurance": "service.insurance",
+            "lawyer": "office.lawyer",
+            "insurance": "office.insurance",
         }
         lower = category.strip().lower()
         if lower in mapping:
@@ -286,15 +288,17 @@ class GeoapifyProvider(BaseProvider):
 
     @staticmethod
     def _parse_coordinates(location: str | None) -> tuple[float, float] | None:
+        """Parse a "lat,lng" string (the grid's cell format) into (lon, lat)."""
         if not location or "," not in location:
             return None
         parts = [part.strip() for part in location.split(",")]
         if len(parts) != 2:
             return None
         try:
-            return float(parts[0]), float(parts[1])
+            lat, lon = float(parts[0]), float(parts[1])
         except ValueError:
             return None
+        return lon, lat
 
     async def _geocode(self, client: httpx.AsyncClient, location: str) -> tuple[float, float] | None:
         """Convert a city name like 'Chicago, IL' to coordinates."""
