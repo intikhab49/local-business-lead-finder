@@ -9,7 +9,7 @@ description = "Self-hosted lead generation engine: grid discovery past provider 
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "PolyForm Noncommercial License 1.0.0"}
-authors = [{name = "Intikhab Azam"}]
+authors = [{name = "Intikhab Azam", email = "intikhabhunzai@gmail.com"}]
 keywords = ["business", "leads", "lead-generation", "google-places", "openstreetmap", "fastapi"]
 classifiers = [
     "Development Status :: 4 - Beta",

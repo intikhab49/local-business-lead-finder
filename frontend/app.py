@@ -88,6 +88,9 @@ PROVIDER_LABELS = {
 
 POLL_SECONDS = 1.5
 
+# Authorship (the backend's copy is app/core/provenance.py).
+BUILT_BY = "Built by Intikhab Azam · intikhabhunzai@gmail.com"
+
 
 # ── shared helpers ────────────────────────────────────────────────
 
@@ -172,6 +175,8 @@ def render_sidebar() -> str:
                 f"**{stats.get('total', 0):,}** leads · "
                 f"**{stats.get('with_email', 0):,}** with e-mail"
             )
+
+        st.markdown(f"<div class='built-by'>{BUILT_BY}</div>", unsafe_allow_html=True)
     return page
 
 

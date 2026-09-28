@@ -11,6 +11,7 @@ from app.api import api_router
 from app.core.config import settings
 from app.core.exceptions import BusinessLeadFinderError
 from app.core.logging import setup_logging
+from app.core.provenance import AUTHOR, AUTHOR_EMAIL, AUTHOR_URL, BUILD_FINGERPRINT, COPYRIGHT
 from app.db.database import get_engine, get_session_local, init_db
 from app.dependencies import get_business_search_service, get_provider
 from app.services.run_history_service import mark_interrupted_runs
@@ -36,6 +37,7 @@ async def _startup_health_check() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
+    logger.info("Built by %s <%s> · build %s", AUTHOR, AUTHOR_EMAIL, BUILD_FINGERPRINT)
     logger.info("Environment: %s", settings.environment)
 
     init_db()
@@ -72,7 +74,14 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.is_development else None,
         openapi_url="/openapi.json" if settings.is_development else None,
         lifespan=lifespan,
+        contact={"name": AUTHOR, "email": AUTHOR_EMAIL, "url": AUTHOR_URL},
     )
+
+    @app.middleware("http")
+    async def built_by_header(request, call_next):
+        response = await call_next(request)
+        response.headers["X-Built-By"] = f"{AUTHOR} <{AUTHOR_EMAIL}>"
+        return response
 
     app.add_middleware(
         CORSMiddleware,
@@ -115,6 +124,9 @@ def create_app() -> FastAPI:
             "version": settings.app_version,
             "environment": settings.environment,
             "docs": "/docs" if settings.is_development else "disabled in production",
+            "author": f"{AUTHOR} <{AUTHOR_EMAIL}>",
+            "copyright": COPYRIGHT,
+            "build": BUILD_FINGERPRINT,
         }
 
     @app.get("/health", tags=["health"])

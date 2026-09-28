@@ -464,3 +464,12 @@ hr {
   opacity: 1 !important;
   transition: none !important;
 }
+
+/* Author credit: bottom of the sidebar, small and faint on purpose. */
+.built-by {
+  margin-top: 3rem;
+  font-size: 10px;
+  line-height: 1.4;
+  opacity: 0.35;
+  color: var(--text-muted);
+}
